@@ -45,24 +45,41 @@ process_zip ()
     # Check exit code to see if it worked and act accordingly
     if [ $? -eq 0 ] #success
     then
-        echo "I've succeeded in extracting the zip $file_to_process for ya! <3"
+        echo "I've succeeded in extracting the zip \"$file_to_process\" for ya! :D"
+        echo "Cleaning up $file_to_process (rm)"
+
+        rm "$file_to_process"
 
         # Calls itself again with the new unzipped zip
         # Which it already knows the filename to because,
         # the filename of the new Zip is the password of the Old one
         process_zip "$passwd.zip"
 
-    if [ $? -eq 82 ] #failed, wrong pass
+    elif [ $? -eq 82 ] #failed, wrong pass
     then
-        echo "Zip extraction failed due to incorrect password" >&2
-        echo "Attempted password: $passwd" >&2
+        echo "Zip extraction of \"$file_to_process\", failed due to incorrect password" >&2
+        echo "Attempted password: \"$passwd\" " >&2
         exit 1
     else #idfk what happened
         echo "Failed due to unknown error" >&2
         echo "Error code from unzip: $?" >&2
         exit 2
     fi
-
-
-
 }
+
+# Initial logic to start up the whole loop
+# Unzip initial zip
+unzip -P "hackthebox" "Eternal Loop.zip"
+
+# Check if it worked
+if [ $? -ep 0] #success
+then
+    echo "Off to a great start! initial zip containing the loop has been extracted! :D"
+    echo "It's time to begin the loop!"
+
+    # Begin the loop :D
+    first_zip=$(unzip -Z1 "Eternal Loop.zip")
+    process_zip "$first_zip"
+else # Uhh, not a success
+    echo "Failed extracting the initial zip due to an unknown error, plz double check existence of zip <3"
+    exit 1
